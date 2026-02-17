@@ -97,6 +97,11 @@ namespace SlimeVR
             uint8_t activeSensorCount = 0;
 #define IMU_DESC_ENTRY(ImuType, ...)                                  \
             {                                                         \
+                uint8_t SENSOR_LIST[6] = {0 ,2, 4 ,1 ,3 ,5};          \
+                Wire.begin();                                         \
+                Wire.beginTransmission(0x70);                         \
+                Wire.write(1 << SENSOR_LIST[sensorID]);               \
+                Wire.endTransmission();                               \
                 auto sensor = buildSensor<ImuType>(sensorID, __VA_ARGS__); \
                 if (sensor->isWorking()) {                            \
                     m_Logger.info("Sensor %d configured", sensorID+1);\
@@ -132,7 +137,12 @@ namespace SlimeVR
         {
             // Gather IMU data
             bool allIMUGood = true;
+            uint8_t sensorID = 0;
+            uint8_t SENSOR_LIST[6] = {0 ,2, 4 ,1 ,3 ,5};
             for (auto &sensor : m_Sensors) {
+                Wire.beginTransmission(0x70);  // TCA9548A address is 0x70
+                Wire.write(1 << SENSOR_LIST[sensorID]);     // send byte to select bus
+                Wire.endTransmission();
                 if (sensor->isWorking()) {
                     swapI2C(sensor->sclPin, sensor->sdaPin);
                     sensor->motionLoop();
@@ -141,6 +151,7 @@ namespace SlimeVR
                 {
                     allIMUGood = false;
                 }
+                sensorID++;
             }
 
             statusManager.setStatus(SlimeVR::Status::IMU_ERROR, !allIMUGood);

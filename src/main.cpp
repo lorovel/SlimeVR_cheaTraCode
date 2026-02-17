@@ -55,7 +55,7 @@ void setup()
 
 #ifdef ESP32C3
     // Wait for the Computer to be able to connect.
-    delay(2000);
+    delay(6000);
 #endif
 
     Serial.println();
@@ -113,11 +113,11 @@ void loop()
 {
     globalTimer.tick();
     SerialCommands::update();
-    OTA::otaUpdate();
+    // OTA::otaUpdate();
     networkManager.update();
     sensorManager.update();
-    battery.Loop();
-    ledManager.update();
+    // battery.Loop();
+    // ledManager.update();
 #ifdef TARGET_LOOPTIME_MICROS
     long elapsed = (micros() - loopTime);
     if (elapsed < TARGET_LOOPTIME_MICROS)
